@@ -1,4 +1,4 @@
 # X 
 
-A Collection Go Packages.
+A collection of Go Packages.
 
