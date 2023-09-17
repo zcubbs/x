@@ -7,6 +7,16 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'LICENSE'
+      - 'Taskfile.yaml'
+      - '.gitignore'
+      - '.gosec.config.json'
+      - '.editorconfig'
+      - '.goreleaser.yaml'
 
 jobs:
   scan:
