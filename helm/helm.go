@@ -15,7 +15,7 @@ const (
 	InstallScriptUrl = "https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3"
 )
 
-func Install(debug bool) error {
+func InstallCli(debug bool) error {
 	if debug {
 		fmt.Printf("installing helm %s", "curl -fsSL -o "+TmpHelmScript+InstallScriptUrl)
 	}

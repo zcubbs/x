@@ -18,7 +18,67 @@ import (
 	"os"
 )
 
-type InstallChartOptions struct {
+type Chart struct {
+	Name      string
+	Repo      string
+	URL       string
+	Version   string
+	Values    map[string]interface{}
+	Namespace string
+}
+
+// Install installs a helm chart.
+func Install(chart Chart, kubeconfig string, debug bool) error {
+	vals := convertMapToChartValues(chart.Values)
+	chartOptions := installChartOptions{
+		Kubeconfig:   kubeconfig,
+		RepoName:     chart.Repo,
+		RepoUrl:      chart.URL,
+		ChartName:    chart.Name,
+		Namespace:    chart.Namespace,
+		ChartVersion: chart.Version,
+		ChartValues:  vals,
+		Debug:        debug,
+	}
+
+	return installChart(chartOptions)
+}
+
+func convertMapToChartValues(input map[string]interface{}) helmValues.Options {
+	var sets []string
+	recursiveBuildSets(input, "", &sets)
+
+	return helmValues.Options{
+		Values: sets,
+	}
+}
+
+func recursiveBuildSets(input map[string]interface{}, parentKey string, sets *[]string) {
+	for key, value := range input {
+		if castedValue, ok := value.(map[string]interface{}); ok {
+			// If value is another map, recursively handle it
+			if parentKey == "" {
+				recursiveBuildSets(castedValue, key, sets)
+			} else {
+				recursiveBuildSets(castedValue, fmt.Sprintf("%s.%s", parentKey, key), sets)
+			}
+		} else {
+			// Else, add to the set slice
+			setValue := fmt.Sprintf("%s=%v", key, value)
+			if parentKey != "" {
+				setValue = fmt.Sprintf("%s.%s=%v", parentKey, key, value)
+			}
+			*sets = append(*sets, setValue)
+		}
+	}
+}
+
+// Uninstall uninstalls a helm chart.
+func Uninstall(chart Chart, kubeconfig string, debug bool) error {
+	return uninstallChart(kubeconfig, chart.Name, chart.Namespace, debug)
+}
+
+type installChartOptions struct {
 	Kubeconfig   string
 	RepoName     string
 	RepoUrl      string
@@ -31,7 +91,7 @@ type InstallChartOptions struct {
 	ValuesFile   string
 }
 
-func InstallChart(options InstallChartOptions) error {
+func installChart(options installChartOptions) error {
 	var settings = cli.New()
 	settings.KubeConfig = options.Kubeconfig
 	settings.Debug = options.Debug
@@ -58,10 +118,10 @@ func InstallChart(options InstallChartOptions) error {
 		return updateChart(options, actionConfig, settings)
 	}
 
-	return installChart(options, actionConfig, settings)
+	return performInstallChart(options, actionConfig, settings)
 }
 
-func updateChart(options InstallChartOptions, actionConfig *action.Configuration, settings *cli.EnvSettings) error {
+func updateChart(options installChartOptions, actionConfig *action.Configuration, settings *cli.EnvSettings) error {
 	client := action.NewUpgrade(actionConfig)
 	client.Namespace = options.Namespace
 
@@ -98,7 +158,7 @@ func updateChart(options InstallChartOptions, actionConfig *action.Configuration
 	return nil
 }
 
-func installChart(options InstallChartOptions, actionConfig *action.Configuration, settings *cli.EnvSettings) error {
+func performInstallChart(options installChartOptions, actionConfig *action.Configuration, settings *cli.EnvSettings) error {
 	client := action.NewInstall(actionConfig)
 	client.CreateNamespace = true
 
@@ -163,7 +223,7 @@ func releaseExists(releaseName, namespace string, settings *cli.EnvSettings) (bo
 	return false, nil
 }
 
-func setClientOptions(client *action.Install, options InstallChartOptions) {
+func setClientOptions(client *action.Install, options installChartOptions) {
 	client.IsUpgrade = options.Upgrade
 	client.ReleaseName = options.ChartName
 	client.Namespace = options.Namespace
@@ -177,7 +237,7 @@ func setClientOptions(client *action.Install, options InstallChartOptions) {
 	}
 }
 
-func locateChartPath(client *action.Install, options InstallChartOptions, settings *cli.EnvSettings) (string, error) {
+func locateChartPath(client *action.Install, options installChartOptions, settings *cli.EnvSettings) (string, error) {
 	cp, err := client.ChartPathOptions.LocateChart(fmt.Sprintf("%s/%s", options.RepoName, options.ChartName), settings)
 	if err != nil {
 		return "", fmt.Errorf("failed to locate chart. %s", err)
@@ -189,7 +249,7 @@ func locateChartPath(client *action.Install, options InstallChartOptions, settin
 	return cp, nil
 }
 
-func handleInstallError(err error, options InstallChartOptions) error {
+func handleInstallError(err error, options installChartOptions) error {
 	if err.Error() == "cannot re-use a name that is still in use" && options.Debug {
 		fmt.Println("warning: chart release name already exists, no action taken!")
 		return nil
@@ -197,7 +257,7 @@ func handleInstallError(err error, options InstallChartOptions) error {
 	return fmt.Errorf("failed to install chart: %w", err)
 }
 
-func printDebugInfo(release *release.Release, options InstallChartOptions) {
+func printDebugInfo(release *release.Release, options installChartOptions) {
 	if options.Debug {
 		fmt.Println(release.Manifest)
 		fmt.Println(release.Info)
@@ -253,7 +313,7 @@ func updateDependencies(cp string, client *action.Install, settings *cli.EnvSett
 	return nil
 }
 
-func UninstallChart(kubeconfig, name, namespace string, debug bool) error {
+func uninstallChart(kubeconfig, name, namespace string, debug bool) error {
 	var settings = cli.New()
 	settings.KubeConfig = kubeconfig
 	actionConfig := new(action.Configuration)
