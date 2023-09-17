@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func Must(err error) {
+func Succeed(err error) {
 	if err != nil {
 		GetTheHeckOut(err)
 	}
