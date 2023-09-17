@@ -19,17 +19,19 @@ import (
 )
 
 type Chart struct {
-	Name      string
-	Repo      string
-	URL       string
-	Version   string
-	Values    map[string]interface{}
-	Namespace string
+	Name        string
+	Repo        string
+	URL         string
+	Version     string
+	Values      map[string]interface{}
+	ValuesFiles []string
+	Namespace   string
 }
 
 // Install installs a helm chart.
 func Install(chart Chart, kubeconfig string, debug bool) error {
 	vals := convertMapToChartValues(chart.Values)
+	vals.ValueFiles = chart.ValuesFiles
 	chartOptions := installChartOptions{
 		Kubeconfig:   kubeconfig,
 		RepoName:     chart.Repo,
