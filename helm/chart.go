@@ -19,14 +19,15 @@ import (
 )
 
 type Chart struct {
-	Name        string
-	Repo        string
-	URL         string
-	Version     string
-	Values      map[string]interface{}
-	ValuesFiles []string
-	Namespace   string
-	Upgrade     bool
+	Name            string
+	Repo            string
+	URL             string
+	Version         string
+	Values          map[string]interface{}
+	ValuesFiles     []string
+	Namespace       string
+	Upgrade         bool
+	CreateNamespace bool
 }
 
 // Install installs a helm chart.
@@ -110,6 +111,18 @@ func installChart(options installChartOptions) error {
 		os.Getenv("HELM_DRIVER"),
 		helmLog); err != nil {
 		return fmt.Errorf("failed to init action config. %s", err)
+	}
+
+	// Add repo if it doesn't exist
+	err := RepoAdd(options.RepoName, options.RepoUrl, options.Debug)
+	if err != nil {
+		return fmt.Errorf("failed to add repo: %w", err)
+	}
+
+	// Update charts from the helm repo
+	err = RepoUpdate(options.Debug)
+	if err != nil {
+		return fmt.Errorf("failed to update repo: %w", err)
 	}
 
 	// Check if release exists
