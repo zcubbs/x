@@ -26,6 +26,7 @@ type Chart struct {
 	Values      map[string]interface{}
 	ValuesFiles []string
 	Namespace   string
+	Upgrade     bool
 }
 
 // Install installs a helm chart.
@@ -41,6 +42,7 @@ func Install(chart Chart, kubeconfig string, debug bool) error {
 		ChartVersion: chart.Version,
 		ChartValues:  vals,
 		Debug:        debug,
+		Upgrade:      chart.Upgrade,
 	}
 
 	return installChart(chartOptions)
