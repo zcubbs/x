@@ -7,7 +7,10 @@ import (
 
 // GetServiceCIDR returns the service CIDR from the Kubernetes cluster
 func GetServiceCIDR(ctx context.Context, kubeconfig string) (string, error) {
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return "", err
+	}
 
 	nodeList, err := cs.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 	if err != nil {

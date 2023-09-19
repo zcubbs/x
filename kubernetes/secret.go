@@ -49,7 +49,10 @@ func CreateContainerRegistrySecret(
 		Type: v1.SecretTypeDockerConfigJson,
 	}
 
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return err
+	}
 
 	for _, namespace := range namespaces {
 		created, err := cs.CoreV1().Secrets(namespace).Create(ctx, secret, metav1.CreateOptions{})
@@ -76,7 +79,10 @@ func CreateGenericSecret(
 	namespaces []string,
 	replace bool,
 	debug bool) error {
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return err
+	}
 
 	for _, namespace := range namespaces {
 		created, err := cs.CoreV1().Secrets(namespace).Create(ctx, &secretConfig, metav1.CreateOptions{})
@@ -97,7 +103,10 @@ func CreateGenericSecret(
 }
 
 func GetSecret(kubeconfig, namespace, secretName string) (*v1.Secret, error) {
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return nil, err
+	}
 	secret, err := cs.CoreV1().Secrets(namespace).Get(context.Background(), secretName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err

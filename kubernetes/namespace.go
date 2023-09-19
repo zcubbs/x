@@ -8,7 +8,10 @@ import (
 )
 
 func CreateNamespace(kubeconfig string, namespace []string) error {
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return err
+	}
 
 	for _, ns := range namespace {
 		ns := &apiv1.Namespace{

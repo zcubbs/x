@@ -5,16 +5,16 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func GetClientSet(kubeconfig string) *kubernetes.Clientset {
+func GetClientSet(kubeconfig string) (*kubernetes.Clientset, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
 	cs, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
 
-	return cs
+	return cs, nil
 }

@@ -14,7 +14,10 @@ func IsDeploymentReady(ctx context.Context,
 	deploymentNames []string,
 	debug bool) error {
 
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return err
+	}
 	for _, deploymentName := range deploymentNames {
 		err := isDeploymentUnitReady(ctx, namespace, deploymentName, cs, debug)
 		if err != nil {
@@ -53,7 +56,10 @@ func isDeploymentUnitReady(ctx context.Context,
 
 // IsClusterReady checks if a kubernetes cluster is ready
 func IsClusterReady(ctx context.Context, kubeconfig string) (bool, error) {
-	cs := GetClientSet(kubeconfig)
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return false, err
+	}
 	nodes, err := cs.CoreV1().Nodes().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return false, err
