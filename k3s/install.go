@@ -22,17 +22,21 @@ type Config struct {
 	DataDir                 string
 	DefaultLocalStoragePath string
 	WriteKubeconfigMode     string
+	HttpsListenPort         string
 }
 
 var configTmpl = `---
 {{- if .Disable }}
-disable: 
+disable:
 {{- range $val := $.Disable }}
   - {{ $val }}
 {{- end }}
 {{- end }}
 {{- if .DefaultLocalStoragePath }}
 default-local-storage-path: {{ .DefaultLocalStoragePath }}
+{{- end }}
+{{- if .HttpsListenPort }}
+https-listen-port: {{ .HttpsListenPort }}
 {{- end }}
 {{- if .TlsSan }}
 tls-san:
