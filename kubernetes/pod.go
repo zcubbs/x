@@ -14,6 +14,9 @@ func RestartPods(kubeconfig, namespace string, podNames []string, debug bool) er
 	}
 
 	pods, err := GetPodsInNamespace(kubeconfig, namespace, debug)
+	if err != nil {
+		return err
+	}
 	deletePolicy := metav1.DeletePropagationForeground
 
 	for _, pod := range pods {
