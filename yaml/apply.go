@@ -1,4 +1,4 @@
-package templates
+package yaml
 
 import (
 	"bytes"

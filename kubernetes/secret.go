@@ -113,3 +113,14 @@ func GetSecret(kubeconfig, namespace, secretName string) (*v1.Secret, error) {
 	}
 	return secret, nil
 }
+
+// GetSecretByName retrieves a Kubernetes Secret by its name.
+func GetSecretByName(kubeconfig, namespace, secretName string) (*v1.Secret, error) {
+	cs, err := GetClientSet(kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+	return cs.CoreV1().
+		Secrets(namespace).
+		Get(context.TODO(), secretName, metav1.GetOptions{})
+}

@@ -5,13 +5,26 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-func PrintColoredHeader(text string) {
+type Color string
+
+const (
+	Black   Color = "0"
+	Red     Color = "1"
+	Green   Color = "2"
+	Yellow  Color = "3"
+	Blue    Color = "4"
+	Magenta Color = "5"
+	Cyan    Color = "6"
+	White   Color = "7"
+)
+
+func PrintColoredHeader(text string, foreground Color, background Color) {
 	var style = lipgloss.NewStyle().
 		Bold(true).
 		MarginTop(1).
 		PaddingLeft(1).
-		Foreground(lipgloss.Color("15")).
-		Background(lipgloss.Color("12")).
+		Foreground(lipgloss.Color(foreground)).
+		Background(lipgloss.Color(background)).
 		Align(lipgloss.Left).
 		Width(40)
 

@@ -3,13 +3,13 @@ package kubernetes
 import (
 	"fmt"
 	"github.com/zcubbs/x/bash"
-	"github.com/zcubbs/x/templates"
+	"github.com/zcubbs/x/yaml"
 	"os"
 	"time"
 )
 
 func ApplyManifest(manifestTmpl string, data interface{}, debug bool) error {
-	b, err := templates.ApplyTmpl(manifestTmpl, data, debug)
+	b, err := yaml.ApplyTmpl(manifestTmpl, data, debug)
 	if err != nil {
 		return fmt.Errorf("failed to apply template \n %w", err)
 	}
