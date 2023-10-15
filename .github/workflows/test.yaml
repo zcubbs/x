@@ -28,6 +28,9 @@ jobs:
     services:
       mailpit:
         image: axllent/mailpit@sha256:aa631ba95124beb8adc338f0590b4deb48ed9c187d46759626b8e2f9342deb79
+        env:
+          MP_SMTP_AUTH_ACCEPT_ANY: true
+          MP_SMTP_AUTH_ALLOW_INSECURE: true
         ports:
           - 1025:1025
 
