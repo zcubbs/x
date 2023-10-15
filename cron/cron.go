@@ -3,28 +3,30 @@ package cron
 import (
 	"context"
 	"github.com/robfig/cron/v3"
-	"github.com/zcubbs/x/logwrapper"
+	"github.com/zcubbs/logwrapper"
+	"github.com/zcubbs/logwrapper/logger"
 )
 
 type Job struct {
 	CronPattern string
 	Name        string
 	Task        func(ctx context.Context)
-	log         logwrapper.Logger
+	log         logger.Logger
 }
 
 type JobOption func(job *Job)
 
-func WithLogger(logger logwrapper.Logger) JobOption {
+func WithLogger(logger logger.Logger) JobOption {
 	return func(job *Job) {
 		job.log = logger
 	}
 }
 
-func NewJob(cronPattern string, task func(ctx context.Context), options ...JobOption) *Job {
+func NewJob(name, cronPattern string, task func(ctx context.Context), options ...JobOption) *Job {
 	job := &Job{
 		CronPattern: cronPattern,
 		Task:        task,
+		Name:        name,
 	}
 
 	for _, option := range options {
@@ -32,7 +34,11 @@ func NewJob(cronPattern string, task func(ctx context.Context), options ...JobOp
 	}
 
 	if job.log == nil {
-		job.log = logwrapper.NewLogrusLogger("cron")
+		job.log = logwrapper.NewLogger(
+			logger.LogrusLoggerType,
+			"cron",
+			logger.JSONFormat,
+		)
 	}
 
 	return job
