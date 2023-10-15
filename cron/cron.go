@@ -3,19 +3,19 @@ package cron
 import (
 	"context"
 	"github.com/robfig/cron/v3"
-	"github.com/zcubbs/x/log"
+	"github.com/zcubbs/x/logwrapper"
 )
 
 type Job struct {
 	CronPattern string
 	Name        string
 	Task        func(ctx context.Context)
-	log         *log.Wrapper
+	log         logwrapper.Logger
 }
 
 type JobOption func(job *Job)
 
-func WithLogger(logger *log.Wrapper) JobOption {
+func WithLogger(logger logwrapper.Logger) JobOption {
 	return func(job *Job) {
 		job.log = logger
 	}
@@ -32,7 +32,7 @@ func NewJob(cronPattern string, task func(ctx context.Context), options ...JobOp
 	}
 
 	if job.log == nil {
-		job.log = log.NewStandardLogger(log.InfoLevel)
+		job.log = logwrapper.NewLogrusLogger("cron")
 	}
 
 	return job
@@ -61,6 +61,6 @@ func (job *Job) Start() {
 		job.log.Error("cannot create cron job: %v", err)
 	}
 
-	job.log.Infof("starting cron job: %s", job.Name)
+	job.log.Info("starting cron job: %s", job.Name)
 	c.Start()
 }
