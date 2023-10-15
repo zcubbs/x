@@ -8,6 +8,7 @@ import (
 
 type Job struct {
 	CronPattern string
+	Name        string
 	Task        func(ctx context.Context)
 	log         *log.Wrapper
 }
@@ -60,6 +61,6 @@ func (job *Job) Start() {
 		job.log.Error("cannot create cron job: %v", err)
 	}
 
-	job.log.Info("starting cron job")
+	job.log.Infof("starting cron job: %s", job.Name)
 	c.Start()
 }
