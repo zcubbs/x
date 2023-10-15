@@ -11,3 +11,9 @@ A collection of Go Packages.
 [![Go Report Card](https://goreportcard.com/badge/github.com/zcubbs/x)](https://goreportcard.com/report/github.com/zcubbs/x)
 [![Contributors](https://img.shields.io/github/contributors/zcubbs/x)](https://github.com/zcubbs/x/graphs/contributors)
 [![License](https://img.shields.io/github/license/zcubbs/x.svg)](./LICENSE)
+
+## Usage
+
+```bash
+go get github.com/zcubbs/x
+```
