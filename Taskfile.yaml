@@ -30,6 +30,11 @@ tasks:
       - task: tools:install:golangci-lint
       - task: tools:install:gosec
 
+  tools:install:sops:
+    desc: Install sops
+    cmds:
+      - go install github.com/getsops/sops/v3/cmd/sops@latest
+
   tools:install:golangci-lint:
     desc: Install golangci-lint
     cmds:

@@ -49,5 +49,8 @@ jobs:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install Sops
+        run: task tools:install:sops
+
       - name: Test
         run: task test
