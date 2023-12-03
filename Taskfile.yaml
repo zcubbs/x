@@ -44,3 +44,13 @@ tasks:
     desc: Install gosec
     cmds:
       - go install github.com/securego/gosec/v2/cmd/gosec@latest
+
+  tools:install:gpg:
+    desc: Install gpg
+    cmds:
+      - task tools:install:gpg:{{OS}}
+
+  tools:install:gpg:windows:
+    desc: Install gpg
+    cmds:
+      - scoop install extras/gpg4win

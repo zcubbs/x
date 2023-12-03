@@ -7,7 +7,7 @@ import (
 )
 
 // Encrypt takes a string of plaintext data and returns the encrypted data
-func Encrypt(plaintext string) (string, error) {
+func Encrypt(plaintext, pubKeyPath string) (string, error) {
 	// Create a temporary file
 	tempFile, err := os.CreateTemp("", "sops-encrypt-")
 	if err != nil {
@@ -25,7 +25,7 @@ func Encrypt(plaintext string) (string, error) {
 	}
 
 	// Run sops to encrypt the file
-	encrypted, err := execSopsCommand("--encrypt", tempFile.Name())
+	encrypted, err := execSopsCommand("--pgp", pubKeyPath, "--encrypt", tempFile.Name())
 	if err != nil {
 		return "", err
 	}
@@ -34,7 +34,7 @@ func Encrypt(plaintext string) (string, error) {
 }
 
 // Decrypt takes a string of encrypted data and returns the plaintext
-func Decrypt(encrypted string) (string, error) {
+func Decrypt(encrypted, privKeyPath string) (string, error) {
 	// Create a temporary file
 	tempFile, err := os.CreateTemp("", "sops-decrypt-")
 	if err != nil {
@@ -52,7 +52,7 @@ func Decrypt(encrypted string) (string, error) {
 	}
 
 	// Run sops to decrypt the file
-	decrypted, err := execSopsCommand("--decrypt", tempFile.Name())
+	decrypted, err := execSopsCommand("--pgp", privKeyPath, "--decrypt", tempFile.Name())
 	if err != nil {
 		return "", err
 	}

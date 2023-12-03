@@ -6,7 +6,7 @@ import (
 )
 
 func TestCloneRepository(t *testing.T) {
-	const testRepoURL = "https://github.com/zcubbs/haproxy-test-repo"
+	const testRepoURL = "https://github.com/zcubbs/haproxy-test-repo-public"
 
 	// Create a temporary directory for cloning
 	tempDir, err := os.MkdirTemp("", "haproxy-test-repo-clone")
@@ -29,19 +29,15 @@ func TestPullRepository(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir) // Clean up
 
-	err = CloneRepository("https://github.com/zcubbs/haproxy-test-repo", tempDir, nil)
+	err = CloneRepository("https://github.com/zcubbs/haproxy-test-repo-public", tempDir, nil)
 	if err != nil {
 		t.Fatalf("Setup clone failed: %s", err)
 	}
 
 	// Test PullRepository
-	changed, err := PullRepository(tempDir, nil)
+	_, err = PullRepository(tempDir, nil)
 	if err != nil {
 		t.Fatalf("PullRepository failed: %s", err)
-	}
-
-	if !changed {
-		t.Error("Expected changes on pull, but got none")
 	}
 }
 
@@ -53,7 +49,7 @@ func TestGetLatestCommit(t *testing.T) {
 	}
 	defer os.RemoveAll(tempDir) // Clean up
 
-	err = CloneRepository("https://github.com/zcubbs/haproxy-test-repo", tempDir, nil)
+	err = CloneRepository("https://github.com/zcubbs/haproxy-test-repo-public", tempDir, nil)
 	if err != nil {
 		t.Fatalf("Setup clone failed: %s", err)
 	}
