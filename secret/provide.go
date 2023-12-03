@@ -2,6 +2,7 @@ package secret
 
 import (
 	"fmt"
+	"github.com/zcubbs/x/sops"
 	"os"
 	"strings"
 )
@@ -9,6 +10,7 @@ import (
 // Provide returns a secret value for a given key.
 // if the key starts with "file://" then the value is read from the file.
 // if the key starts with "env." then the value is read from the environment variable.
+// if the key starts with "sops." then the value is read from the sops.
 // if the key starts with "zkv." then the value is read from github.com/zcubbs/zkv.
 // if the key starts with "hcv." the value is read from the hashicorp vault.
 // if the key starts with "gcp." then the value is read from the gcp.
@@ -22,6 +24,8 @@ func Provide(key string) (string, error) {
 		return provideFromFile(key)
 	case "env":
 		return provideFromEnv(key)
+	case "sops":
+		return provideFromSops(key)
 	case "zkv":
 		return provideFromZkv(key)
 	case "hcv":
@@ -51,6 +55,17 @@ func provideFromEnv(key string) (string, error) {
 	v := os.Getenv(strings.ReplaceAll(key, "env.", ""))
 	if v == "" {
 		return "", fmt.Errorf("failed to get secret from env")
+	}
+
+	return v, nil
+}
+
+// ProvideFromSops returns a secret value for a given key.
+// if the key starts with "sops." then the value is read from the sops.
+func provideFromSops(key string) (string, error) {
+	v, err := sops.Decrypt(key)
+	if err != nil {
+		return "", fmt.Errorf("failed to get secret from sops")
 	}
 
 	return v, nil

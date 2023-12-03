@@ -1,44 +1,58 @@
-// Package git
-/*
-Copyright © 2023 zcubbs https://github.com/zcubbs
-*/
+// Package git provides utilities to interact with git repositories.
+//
+// This package is primarily designed to clone and pull updates from
+// git repositories, specifically with support for optional credentials
+// in the form of username and password from environment variables.
+//
+// Author: zakaria.elbouwab
+// zcubbs https://github.com/zcubbs
 package git
 
 import (
+	"errors"
 	"fmt"
-	goGit "github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	git "github.com/go-git/go-git/v5"
+	gitHttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/zcubbs/x/bash"
-	"os"
 )
 
-// Clone clones a git repository to a given path
-func Clone(url string, path string) error {
-	_, err := goGit.PlainClone(path, false, &goGit.CloneOptions{
-		URL:      url,
-		Progress: os.Stdout,
-	})
-
-	return err
-}
-
-func CloneWithCredentials(url string, path string, username string, password string) error {
-	_, err := goGit.PlainClone(path, false, &goGit.CloneOptions{
-		Auth: &http.BasicAuth{
-			Username: username,
-			Password: password,
-		},
-		URL:      url,
-		Progress: os.Stdout,
-	})
-
-	if err != nil {
-		return err
+// CloneRepository clones a Git repository into a given directory with optional authentication.
+func CloneRepository(repoURL, destination string, auth *gitHttp.BasicAuth) error {
+	cloneOptions := &git.CloneOptions{
+		URL:  repoURL,
+		Auth: auth, // This can be nil, which is handled by go-git
 	}
 
-	fmt.Println("Cloned repository to " + path + " successfully!")
+	_, err := git.PlainClone(destination, false, cloneOptions)
+	if err != nil {
+		return fmt.Errorf("error cloning repository: %w", err)
+	}
+	return nil
+}
 
-	return err
+// PullRepository updates the local copy of a Git repository with optional authentication and returns true if there were changes.
+func PullRepository(repoPath string, auth *gitHttp.BasicAuth) (bool, error) {
+	r, err := git.PlainOpen(repoPath)
+	if err != nil {
+		return false, fmt.Errorf("error opening repository: %w", err)
+	}
+
+	w, err := r.Worktree()
+	if err != nil {
+		return false, fmt.Errorf("error getting worktree: %w", err)
+	}
+
+	pullOptions := &git.PullOptions{
+		RemoteName: "origin",
+		Auth:       auth,
+	}
+
+	err = w.Pull(pullOptions)
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return false, fmt.Errorf("error pulling repository: %w", err)
+	}
+
+	return !errors.Is(err, git.NoErrAlreadyUpToDate), nil
 }
 
 func GetLatestCommit(gitRepoPath string) (string, error) {
