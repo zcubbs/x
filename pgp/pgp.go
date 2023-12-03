@@ -1,9 +1,13 @@
 package pgp
 
 import (
+	"errors"
+	"fmt"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -56,6 +60,51 @@ func GeneratePGPKeys(name, email, pubKeyPath, privKeyPath string) error {
 	err = entity.Serialize(pubWriter)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ExtractKeyID extracts the key ID from a PGP public key file.
+func ExtractKeyID(pubKeyPath string) (string, error) {
+	// Run gpg --import to add the public key to the keyring
+	importCmd := exec.Command("gpg", "--import", pubKeyPath)
+	if err := importCmd.Run(); err != nil {
+		return "", err
+	}
+
+	// Run gpg --list-keys to get the details of the imported key
+	listKeysCmd := exec.Command("gpg", "--list-keys", "--with-colons")
+	output, err := listKeysCmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	// Parse the output to find the Key ID
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "pub") {
+			// The line format should be something like: "pub:u:4096:1:72D7468F9F459A1C:1613032103:::u:::scESC:"
+			cols := strings.Split(line, ":")
+			if len(cols) > 4 {
+				return cols[4], nil // The fifth column is the Key ID
+			}
+		}
+	}
+
+	return "", errors.New("key ID not found")
+}
+
+// ImportPublicKey imports a PGP public key into the GnuPG keyring.
+func ImportPublicKey(pubKeyPath, privKeyPath string) error {
+	// Import the generated PGP keys into the GnuPG keyring
+	importCmd := exec.Command("gpg", "--import", pubKeyPath)
+	if err := importCmd.Run(); err != nil {
+		return fmt.Errorf("failed to import public key into GnuPG keyring: %v", err)
+	}
+	importCmd = exec.Command("gpg", "--allow-secret-key-import", "--import", privKeyPath)
+	if err := importCmd.Run(); err != nil {
+		return fmt.Errorf("failed to import private key into GnuPG keyring: %v", err)
 	}
 
 	return nil

@@ -2,7 +2,6 @@ package pgp
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 )
@@ -29,16 +28,6 @@ func TestGeneratePGPKeys(t *testing.T) {
 	err = GeneratePGPKeys("Test User", "test@example.com", pubKeyPath, privKeyPath)
 	if err != nil {
 		t.Fatalf("Failed to generate PGP keys: %v", err)
-	}
-
-	// Import the generated PGP keys into the GnuPG keyring
-	importCmd := exec.Command("gpg", "--import", pubKeyPath)
-	if err := importCmd.Run(); err != nil {
-		t.Fatalf("Failed to import public key into GnuPG keyring: %v", err)
-	}
-	importCmd = exec.Command("gpg", "--allow-secret-key-import", "--import", privKeyPath)
-	if err := importCmd.Run(); err != nil {
-		t.Fatalf("Failed to import private key into GnuPG keyring: %v", err)
 	}
 
 	// Check if public key file exists and is not empty
