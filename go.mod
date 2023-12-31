@@ -9,7 +9,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/stretchr/testify v1.8.4
-	github.com/zcubbs/logwrapper v0.1.4
+	github.com/zcubbs/log v0.1.5
 	golang.org/x/crypto v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 )

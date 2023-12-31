@@ -3,20 +3,20 @@ package cron
 import (
 	"context"
 	"github.com/robfig/cron/v3"
-	"github.com/zcubbs/logwrapper"
-	"github.com/zcubbs/logwrapper/logger"
+	"github.com/zcubbs/log"
+	"github.com/zcubbs/log/structuredlogger"
 )
 
 type Job struct {
 	CronPattern string
 	Name        string
 	Task        func(ctx context.Context)
-	log         logger.Logger
+	log         log.Logger
 }
 
 type JobOption func(job *Job)
 
-func WithLogger(logger logger.Logger) JobOption {
+func WithLogger(logger log.Logger) JobOption {
 	return func(job *Job) {
 		job.log = logger
 	}
@@ -34,10 +34,10 @@ func NewJob(name, cronPattern string, task func(ctx context.Context), options ..
 	}
 
 	if job.log == nil {
-		job.log = logwrapper.NewLogger(
-			logger.LogrusLoggerType,
+		job.log = log.NewLogger(
+			structuredlogger.StdLoggerType,
 			"cron",
-			logger.JSONFormat,
+			structuredlogger.JSONFormat,
 		)
 	}
 
